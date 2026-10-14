@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: stockyard-sample
+
+server:
+  port: 8080
+
+stockyard:
+  enabled: true
+  tenant-header: X-Tenant-Id
