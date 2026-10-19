@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2026 The stockyard Authors. Licensed under the Apache License, Version 2.0 (the "License"); see the
+  LICENSE file in the project root for the full license text.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.github.nephets</groupId>
+    <artifactId>stockyard</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>stockyard-store</artifactId>
+  <name>stockyard-store</name>
+  <description>可插拔存储实现：InMemoryStockPositionStore / InMemoryReservationStore / InMemoryDeductionStore。三者都是有界 LRU 存储（容量上限 + 淘汰计数可观测），仅适合单进程演示与测试；生产请实现 contract 里的同名接口替换为 Redis/DB。</description>
+
+  <!--
+    ★ 本模块严禁引入任何 org.springframework.* 依赖。
+
+    为什么单独拆存储模块：内存实现是「演示/测试替身」性质的代码，把它和引擎混在一个 jar 里会让
+    「换掉存储」这件事看起来像改引擎。独立成模块后，生产依赖可以只引 contract + core + 自己的
+    store 实现，完全不把内存实现打进产物；而 starter 为了提供开箱即用的默认 Bean，才显式依赖本模块。
+  -->
+  <dependencies>
+    <dependency>
+      <groupId>io.github.nephets</groupId>
+      <artifactId>stockyard-contract</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/package-info.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <properties>
+    <jacoco.line.minimum>${jacoco.line.minimum.core}</jacoco.line.minimum>
+    <jacoco.report.skip>false</jacoco.report.skip>
+  </properties>
+</project>

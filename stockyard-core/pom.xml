@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2026 The stockyard Authors. Licensed under the Apache License, Version 2.0 (the "License"); see the
+  LICENSE file in the project root for the full license text.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.github.nephets</groupId>
+    <artifactId>stockyard</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>stockyard-core</artifactId>
+  <name>stockyard-core</name>
+  <description>引擎层：StockyardEngine 把「预占—确认/取消/超时」状态机、库存水位的定长分片锁防超卖、以及按 requestId 幂等扣减串成一套可插拔存储的库存内核。仅依赖 stockyard-contract 与 slf4j-api。</description>
+
+  <!--
+    ★ 本模块严禁引入任何 org.springframework.* 依赖。
+      CI 的 architecture-boundaries job 用 grep 扫描编译期源码，出现 org.springframework 即失败。
+
+    ★ stockyard-store 只允许出现在 test scope：引擎面向 contract 里的 Store 接口编程，编译期绝不
+      绑定某个具体存储实现，否则「换存储」就变成改引擎。测试里用它作为内存替身。
+  -->
+  <dependencies>
+    <dependency>
+      <groupId>io.github.nephets</groupId>
+      <artifactId>stockyard-contract</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.github.nephets</groupId>
+      <artifactId>stockyard-store</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/package-info.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <properties>
+    <jacoco.line.minimum>${jacoco.line.minimum.core}</jacoco.line.minimum>
+    <jacoco.report.skip>false</jacoco.report.skip>
+  </properties>
+</project>

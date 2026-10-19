@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2026 The stockyard Authors. Licensed under the Apache License, Version 2.0 (the "License"); see the
+  LICENSE file in the project root for the full license text.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.github.nephets</groupId>
+    <artifactId>stockyard</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>stockyard-contract</artifactId>
+  <name>stockyard-contract</name>
+  <description>纯契约层（零可选依赖）：库存水位 StockPosition、SKU/Warehouse/租户值对象、预占状态枚举与不可变 Reservation、幂等扣减记录，以及 ReservationStore / StockPositionStore / DeductionStore 三个存储接口。实现模块与引擎模块都只依赖本模块，互不依赖。</description>
+
+  <!--
+    ★ 本模块严禁引入任何 org.springframework.* 依赖，除 slf4j-api 外不引入任何运行时依赖。
+      CI 的 architecture-boundaries job 用 grep 扫描编译期源码，出现 org.springframework 即失败。
+
+    为什么要把「类型」单独拆一个模块：引擎（stockyard-core）与存储实现（stockyard-store）都应该只面向
+    接口编程，而接口与值对象如果被放在引擎模块里，存储实现就不得不反向依赖引擎——依赖方向会变成环。
+    把契约下沉到最底层模块后，依赖图是一条单向链：
+      contract <- store <- core <- starter <- sample
+    这样调用方可以只引 contract 写自己的存储实现，不必把引擎拖进 classpath。
+  -->
+  <dependencies>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/package-info.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <properties>
+    <jacoco.line.minimum>${jacoco.line.minimum.core}</jacoco.line.minimum>
+    <jacoco.report.skip>false</jacoco.report.skip>
+  </properties>
+</project>
